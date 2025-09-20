@@ -1,0 +1,45 @@
+set title "slab"
+
+% -- number of neutrons:
+set pop 5000 1500 100
+
+% -- unresolved resonance:
+set ures 1 1
+
+% -- reflective boundary condition:
+set bc 1 1 1
+
+% -- path to xs data files:
+set acelib "/usr/local/usrapps/rdfmg/serpent/lib/xs/s2v0_endfb71.xsdata"  % ACE library for cross-sections
+set declib "/usr/local/usrapps/rdfmg/serpent/lib/decay/s2v0_endfb71.dec"  % Library for decay
+set nfylib "/usr/local/usrapps/rdfmg/serpent/lib/decay/s2v0_endfb71.nfy"  % Neutron fission yield library
+ 
+%------------ GEOMETRY ---------------------------------------------------------
+surf 99 inf 
+surf 100 cuboid    -4.160655  4.160655 -4.160655 4.160655 -4.160655 4.160655 
+surf 110 cuboid   -10.00  10.00 -10.00 10.00 -10.00 10.00
+
+
+cell 100 0 fuel       -100
+cell 110 0 graphite   -110 100 
+cell 99  0 outside     110
+ 
+%------------ MATERIAL ---------------------------------------------------------
+
+% -- TRISO particle materials:
+mat fuel  -15.60  tmp 300 rgb 0 255 0 
+  94239.03c   0.03933   % Pu239
+
+mat graphite -1.85  tmp 300   rgb 0 0 255
+ 6000.03c     9.28392E-02 
+
+
+% total flux in material fuel 
+det 1 dx  0.0    4.160655      100
+det 2 dx  4.160655    10.0     100 
+
+plot 3 1000 1000 
+
+set gcu 0
+ene 1gr  1  1E-9 10
+set nfg 1gr

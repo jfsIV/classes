@@ -1,0 +1,22 @@
+
+ ***** Note #1 Tue Sep  9 20:26:49 2025
+
+Material "fuel" color (0, 255, 0) is a reserved RGB plot color
+
+
+ ***** Note #2 Tue Sep  9 20:26:49 2025
+
+Mismatch in lower boundaries of macro- and micro-group structure.
+Both limits set to 0.000000E+00.
+
+
+ ***** Note #3 Tue Sep  9 20:26:49 2025
+
+Mismatch in upper boundaries of macro- and micro-group structure.
+Both limits set to 1.000000E+37.
+
+
+Simulation completed.
+------------------------------------------------------------
+Tue Sep  9 20:29:49 2025  (errors: 0, warnings: 0, notes: 3)
+

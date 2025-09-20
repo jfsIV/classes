@@ -1,0 +1,199 @@
+% ------- PWR Pin Cell Criticality Input File -------
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Problem title
+%%%%%%%%%%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_title
+set title "PWR pin-cell criticality calculation"
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Cross section data library file path
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_acelib
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_declib
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_nfylib
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_sfylib
+
+    % ENDF v7.1
+set acelib "/usr/local/usrapps/rdfmg/serpent/lib/xs/s2v0_endfb71.xsdata"  % ACE library for cross-sections
+set declib "/usr/local/usrapps/rdfmg/serpent/lib/decay/s2v0_endfb71.dec" % Library for decay
+set nfylib "/usr/local/usrapps/rdfmg/serpent/lib/decay/s2v0_endfb71.nfy" %Neutron fission yield library
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Boundary Conditions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_bc
+set bc reflective reflective reflective
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Neutron population and criticality cycles
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % neutrons per cycle, active cycles, inactive cycles
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_pop
+set pop 2000 500 20
+    % Optimization mode specifically for Burnup calcualtion
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_opti
+% set opti 4
+    % Set seed to make the results the same with every run (for debugging/analysis purposes)
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_seed
+% set seed 7777777777
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Energy Options
+%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Turning group constant generation off
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_gcu
+set gcu -1
+
+    % Detector for tallying the flux energy spectrum
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#det_.28detector_definition.29
+det EnergyDetector de EnergyGrid
+
+    % Define the energy grid to be used with the detector. Grid type 3 (bins have uniform lethargy width). 500 bins between 1E-11 MeV and 20 MeV.
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#ene_.28energy_grid_definition.29
+ene EnergyGrid 3 500 1e-11 2e1
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Geometry Plots
+%%%%%%%%%%%%%%%%%%%%%%%%%
+    %The first value defines the plot plane (1 = yz, 2 = xz, 3 = xy).
+    %The second Value defines the plot boundaries (1 = cell boundaries, 2 = Material Boundaries, 3 = Both).
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#plot_.28geometry_plot_definition.29
+plot 3 500 500
+
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#mesh_.28mesh_plot_definition.29
+mesh 3 500 500
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Material definitions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Thermal scattering data for light water (HinH2O):
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#therm_and_thermstoch_.28thermal_scattering.29
+    % More information: http://montecarlo.vtt.fi/download/SSS_THERMAL.pdf
+therm light_water 300 lwe7.00t lwe7.02t
+
+    % ------- UOX fuel, initial enrichment 2.11%:
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#mat_.28material_definition.29
+mat Fuel_21  -10.257 tmp 300 rgb 255 255 0
+ 8016.03c       4.57591E-02         % O-16  @ 300K
+92234.03c       4.04814E-06         % U-234 @ 300K
+92235.03c       4.88801E-04         % U-235 @ 300K
+92236.03c       2.23756E-06         % U-236 @ 300K
+92238.03c       2.23844E-02         % U-238 @ 300K
+
+    % ------- UOX fuel, initial enrichment 2.619%:
+mat Fuel_26  -10.257 tmp 300 rgb 255 128 0
+ 8016.03c       4.57617E-02         % O-16  @ 300K
+92234.03c       5.09503E-06         % U-234 @ 300K
+92235.03c       6.06733E-04         % U-235 @ 300K
+92236.03c       2.76809E-06         % U-236 @ 300K
+92238.03c       2.22663E-02         % U-238 @ 300K
+
+    % ------- UOX fuel, initial enrichment 3.1%:
+mat Fuel_31  -10.257 tmp 300 rgb 102 0 0
+ 8016.03c       4.57642E-02         % O-16  @ 300K
+92234.03c       6.11864E-06         % U-234 @ 300K
+92235.03c       7.18132E-04         % U-235 @ 300K
+92236.03c       3.29861E-06         % U-236 @ 300K
+92238.03c       2.21546E-02         % U-238 @ 300K
+
+    % ------- Moderator, with boron:
+mat Moderator -0.55725 tmp 300 moder light_water 1001 rgb 0 0 255
+ 1001.03c   4.96231E-02             % H-1   @ 300K
+ 5010.03c   1.05835E-05             % B-10  @ 300K
+ 5011.03c   4.25999E-05             % B-11  @ 300K
+ 8016.03c   2.48116E-02             % O-16  @ 300K
+
+    % ------- Cladding, Zircaloy material:
+mat Cladding -6.56 tmp 300 rgb 160 160 160
+24050.03c   3.30121E-06             % Cr-50  @ 300K
+24052.03c   6.36606E-05             % Cr-52  @ 300K
+24053.03c   7.21860E-06             % Cr-53  @ 300K
+24054.03c   1.79686E-06             % Cr-54  @ 300K
+26054.03c   8.68307E-06             % Fe-54  @ 300K
+26056.03c   1.36306E-04             % Fe-56  @ 300K
+26057.03c   3.14789E-06             % Fe-57  @ 300K
+26058.03c   4.18926E-07             % Fe-58  @ 300K
+40090.03c   2.18865E-02             % Zr-90  @ 300K
+40091.03c   4.77292E-03             % Zr-91  @ 300K
+40092.03c   7.29551E-03             % Zr-92  @ 300K
+40094.03c   7.39335E-03             % Zr-94  @ 300K
+40096.03c   1.19110E-03             % Zr-96  @ 300K
+50112.03c   4.68066E-06             % Sn-112 @ 300K
+50114.03c   3.18478E-06             % Sn-114 @ 300K
+50115.03c   1.64064E-06             % Sn-115 @ 300K
+50116.03c   7.01616E-05             % Sn-116 @ 300K
+50117.03c   3.70592E-05             % Sn-117 @ 300K
+50118.03c   1.16872E-04             % Sn-118 @ 300K
+50119.03c   4.14504E-05             % Sn-119 @ 300K
+50120.03c   1.57212E-04             % Sn-120 @ 300K
+50122.03c   2.23417E-05             % Sn-122 @ 300K
+50124.03c   2.79392E-05             % Sn-124 @ 300K
+72174.03c   3.54138E-09             % Hf-174 @ 300K
+72176.03c   1.16423E-07             % Hf-176 @ 300K
+72177.03c   4.11686E-07             % Hf-177 @ 300K
+72178.03c   6.03806E-07             % Hf-178 @ 300K
+72179.03c   3.01460E-07             % Hf-179 @ 300K
+72180.03c   7.76449E-07             % Hf-180 @ 300K
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%
+% ------- Geometry
+%%%%%%%%%%%%%%%%%%%
+
+    %%%%%%%%%%%%%%%%%%%
+    % ------- Surfaces
+    %%%%%%%%%%%%%%%%%%%
+
+    % ------- Fuel pin 1:
+pin P1
+Fuel_21     4.02500E-01
+Cladding    4.75000E-01
+Moderator
+
+    % ------- Fuel pin 2:
+% pin P2
+% Fuel_26     4.02500E-01
+% Cladding    4.75000E-01
+% Moderator
+
+    % ------- Fuel pin 3:
+% pin P3
+% Fuel_31     4.02500E-01
+% Cladding    4.75000E-01
+% Moderator
+
+    % ------- Empry guide tube:
+% pin GT
+% Moderator   5.72500E-01
+% Cladding    6.12500E-01
+% Moderator
+
+    % ------- Empty position (just moderator)
+
+% pin MT
+% Moderator
+
+    % ------- Square surface with 1.5 cm side centered at (x,y) = (0,0)
+
+surf surface_1 sqc 0.0 0.0 0.75
+
+    %%%%%%%%%%%%%%%%
+    % ------- Cells
+    %%%%%%%%%%%%%%%%
+
+    % ------- Cell "cell_1" belongs to the base universe 0, is filled with the pin "P1", and covers everything inside surface "surface_1"
+cell cell_1 0 fill P1 -surface_1
+
+    % --- Cell "cell_2" belongs to the base universe 0, is defined as an "outside" cell, and covers everything outside surface "surface_1"
+
+cell cell_2 0 outside surface_1
+
+
+

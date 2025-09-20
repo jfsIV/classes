@@ -1,0 +1,251 @@
+% ------- HTGR Fuel Compact Input File -------
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Problem title
+%%%%%%%%%%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_title
+set title "HTGR Unit Cell"
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Cross section data library file path
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_acelib
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_declib
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_nfylib
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_sfylib
+
+    % ENDF v8.0 %% DOES NOT CONTAIN DECAY DATA
+% set acelib "/cm/shared/codes/serpent/xsdata/endfb80/sss_endfb80u.xsdata"
+
+    % ENDF v7.1
+% set acelib "/cm/shared/codes/serpent/xsdata/endfb71/sss_endfb71u.xsdata"
+
+    % ENDF v7.0 %% RECOMMENDED
+set acelib "/cm/shared/codes/serpent/xsdata/endfb7/sss_endfb7u.xsdata"
+set declib "/cm/shared/codes/serpent/xsdata/endfb7/sss_endfb7.dec"
+set nfylib "/cm/shared/codes/serpent/xsdata/endfb7/sss_endfb7.nfy"
+
+    % ENDF v6.8 %% NOT RECOMMENDED
+% set acelib "/cm/shared/codes/serpent/xsdata/endfb68/sss_endfb80u.xsdata"
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Boundary Conditions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_bc
+
+% For computations, to have an infinite lattice
+set bc reflective reflective reflective
+
+% For plotting, to see the fuel compact boundaries.
+% set bc 1
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Neutron population and criticality cycles
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % 7777 neutrons per cycle, 777 active / 77 inactive cycles
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_pop
+set pop 10000 500 50
+    % Optimization mode specifically for Burnup calcualtion
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_opti
+% set opti 4
+    % Set seed to make the results the same with every run (for debugging/analysis purposes)
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_seed
+set seed 7777777777
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Energy Options
+%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Setting the energy group structure for cross-section generation if using "set gcu"
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_nfg
+    % set nfg OneGroup
+
+    % Turning group constant generation off, we will use detectors instead
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_gcu
+set gcu -1
+
+    % Detector for tallying the flux energy spectrum
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#det_.28detector_definition.29
+det energyDetector de energyGrid
+
+    % Define the energy grid to be used with the detector.
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#ene_.28energy_grid_definition.29
+
+    % Grid type 3 (bins have uniform lethargy width). 500 bins between 1E-11 MeV and 20 MeV.
+ene energyGrid 3 500 1e-11 2e1
+
+    % Grid type 1 (arbitrary defined energy grid). Between 0 MeV and 100 MeV (max possible).
+ene oneGroup 1 0.0 20.0
+
+    % Detector for tallying the cross-sections
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/ENDF_reaction_MT%27s_and_macroscopic_reaction_numbers
+
+    % Total flux in material "helium", for computing the macroscopic cross-sections needed:
+det totalFluxHelium de oneGroup dm helium
+    % Detector named "macroscopicScatteringHelium", for energy grid "oneGroup", for reaction mode "scattering" in the helium material, divided by the results from detector "totalFluxHelium"
+det macroscopicScatteringHelium de oneGroup dr -3 helium dt 3 totalFluxHelium
+
+% Please add your specific detectors for other materials or for other macroscopic cross-sections using the website in the infromation above.
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Unresolved Resonance
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % More Information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#set_ures
+set ures 1 1
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Geometry Plots
+%%%%%%%%%%%%%%%%%%%%%%%%%
+    %The first value defines the plot plane (1 = yz, 2 = xz, 3 = xy).
+    %The second Value defines the plot boundaries (1 = cell boundaries, 2 = Material Boundaries, 3 = Both).
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#plot_.28geometry_plot_definition.29
+plot 33 1000 1000 2.0
+plot 23 1000 1000
+
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#mesh_.28mesh_plot_definition.29
+mesh 1 3000 3000
+mesh 2 3000 3000
+mesh 3 3000 3000
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ------- Material definitions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Thermal scattering data for graphite:
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#therm_and_thermstoch_.28thermal_scattering.29
+    % More information: http://montecarlo.vtt.fi/download/SSS_THERMAL.pdf
+therm grph 300 gre7.00t gre7.04t
+
+% ------ Fuel Kernel (3.4%) ------
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#mat_.28material_definition.29
+
+mat fuel  -10.4 tmp 300
+% 5010.03c 1.14694E-07   % B-10  @ 300K
+% 5011.03c 4.64570E-07   % B-11  @ 300K
+ 8016.03c 4.64272E-02   % O-16  @ 300K
+92235.03c 1.92585E-03   % U-235 @ 300K
+92238.03c 2.12877E-02   % U-238 @ 300K
+
+% ------ Buffer Layer ------
+
+mat buffer -1.05  tmp 300  moder grph 6000
+ 6000.03c 5.26449E-02   % C-6   @ 300K
+
+% ------ Inner Pyrolytic Carbon Layer ------
+
+mat IPyC   -1.90  tmp 300 moder grph 6000
+ 6000.03c 9.52621E-02   % C-6   @ 300K
+
+% ------ SiC Layer ------
+
+mat SiC    -3.18  tmp 300
+ 6000.03c 4.77240E-02   % C-6   @ 300K
+14000.03c 4.77240E-02   % Si-14 @ 300K
+
+% ------ Outer Pyrolytic Carbon Layer ------
+
+mat OPyC   -1.90  tmp 300 moder grph 6000
+ 6000.03c 9.52621E-02   % C-6   @ 300K
+
+% ------ Graphite matrix ------
+
+mat matrix -1.75  tmp 300 moder grph 6000 rgb 160 160 160
+% 5010.03c 9.64977E-09   % B-10  @ 300K
+% 5011.03c 3.90864E-08   % B-11  @ 300K
+ 6000.03c 8.77414E-02   % C-6   @ 300K
+
+% ------ Helium Coolant ------
+
+mat helium  2.65156E-05 tmp 300 rgb 0 0 255
+2004.03c    2.65156E-05     % He-4  @ 300K
+
+%-------------------------------------------------------------------------------------------------------------------------------%
+%%%%%%%%%%%%%%%%%%%
+% ------- Geometry
+%%%%%%%%%%%%%%%%%%%
+
+    %%%%%%%%%%%%%%%%%%%%
+    % ------- Particles
+    %%%%%%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#particle_.28particle_geometry_definition.29
+    % ------- TRISO Particle 1:
+
+particle 1
+
+fuel    0.0250
+buffer  0.0340
+IPyC    0.0380
+SiC     0.0415
+OPyC    0.0455
+void
+
+% --- Read particles:
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#pbed_.28explicit_stochastic_.28pebble_bed.29_geometry.29
+pbed 10 6 "htgr_prism_particles"
+
+    %%%%%%%%%%%%%%%%%%
+    % ------- Lattice
+    %%%%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#lat_.28regular_lattice_definition.29
+
+    % ------- Pin lattice definition, name of the lattice "lattice_1"
+    %     Lattice type 2 (X-type hexagonal lattice)
+    %     Lattice centered at 0.0 0.0
+    %     3 x 3 lattice elements
+    %     Lattice pitch 1.88 cm
+
+% --- Compact lattice
+lat 20  2  0.0 0.0 3 3 1.880
+
+  4 2 2
+   2 3 2
+    2 2 4
+
+    %%%%%%%%%%%%%%%%%%%
+    % ------- Surfaces
+    %%%%%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#surf_.28surface_definition.29
+% --- Universe surrounding particles:
+surf 10 inf
+
+% --- Compact
+surf 1 cyl 0.0 0.0 0.62250
+surf 2 cyl 0.0 0.0 0.62350
+
+% --- Coolant channel
+surf 3 cyl 0.0 0.0 0.79400
+
+% --- Empty lattice position
+surf 5 inf
+
+% --- Fuel element boundary
+surf 7 hexxprism 0.0 0.0 1.880 0.0 4.93
+
+    %%%%%%%%%%%%%%%%
+    % ------- Cells
+    %%%%%%%%%%%%%%%%
+    % More information: https://serpent.vtt.fi/mediawiki/index.php/Input_syntax_manual#cell_.28cell_definition.29
+
+% --- Universe surrounding particles (inside compact)
+cell 10 6 matrix  -10
+
+% --- Compact
+cell 1 2 fill 10  -1
+cell 2 2 helium    1 -2
+cell 3 2 matrix    2
+
+% --- Coolant channel
+cell 4 3 helium   -3
+cell 5 3 matrix    3
+
+% --- Empty lattice position
+cell 6 4 matrix -5
+
+% --- Fuel element lattice
+cell 7 0 fill 20 -7
+cell 8 0 outside  7
